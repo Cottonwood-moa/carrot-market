@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma는 ORM(Obeject Relational Mapping)으로
+// 객체형태의 데이터를 모델에 맵핑해주는 변환기 같은 것이다.
+// 밑의 User처럼 객체 형태로 데이터베이스를 만들면
+// 여기서는 mysql로 provide 해준다.
+// 데이터베이스는 여기서 planet scale을 사용한 것이다.
+// 데이터베이스 주소는 .env 에 저장되어 있다.
+
+generator client {
+  provider        = "prisma-client-js"
+  // 어떤 객체가 다른 객체랑 매핑될때 다른 객체의 존재를 확인하는 옵션
+  // MySQL은 오류가 자동으로 나지만 Vitess는 나지않음
+  // ex) 댓글을 작성할때 유저id가 없는 아이디일때 Vitess는 userid가 존재하는지
+  // 먼저 확인을 하지 않기 때문에 오류가 발생하지 않지만 그래선 안됨.
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  // ''
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id         Int         @id @default(autoincrement())
+  phone      String?     @unique
+  email      String?     @unique
+  name       String
+  avatar     String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  tokens     Token[]
+  products   Product[]
+  Fav        Fav[]
+  Posts      Post[]
+  Answers    Answer[]
+  Wonderings Wondering[]
+}
+
+model Token {
+  id        Int      @id @default(autoincrement())
+  payload   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  image       String
+  name        String
+  price       Int
+  description String   @db.MediumText
+  Fav         Fav[]
+}
+
+model Fav {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    Int
+  productId Int
+}
+
+model Post {
+  id        Int         @id @default(autoincrement())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  question  String      @db.MediumText
+  latitude  Float?
+  longitude Float?
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  Answer    Answer[]
+  Wondering Wondering[]
+}
+
+model Answer {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int
+  answer String @db.MediumText
+
+}
+
+model Wondering {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int
+}
+
+// onDelete: Cascade
+// 부모 레코드가 삭제되면 자식 레코드도 함께 삭제하도록 한다.
+// ```
+// // 옵션
+// Cascade
+// Restrict
+// NoAction
+// SetNull
+// SetDefaul

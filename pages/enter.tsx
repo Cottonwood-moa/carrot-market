@@ -1,81 +1,149 @@
-import { useState } from "react";
-
-function cls(...classnames: string[]) {
-  return classnames.join(" ");
+import type { NextPage } from "next";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import Button from "@components/button";
+import Input from "@components/input";
+import useMutation from "@libs/client/useMutation";
+import { cls } from "@libs/client/utils";
+import { useRouter } from "next/router";
+interface EnterForm {
+  email?: string;
+  phone?: string;
 }
-
-export default function Enter() {
+interface tokenForm {
+  token: number;
+}
+interface MutationResult {
+  ok: boolean;
+}
+const Enter: NextPage = () => {
+  const [enter, { loading, data, error }] =
+    // EnterMutationResult은 useMutation의 <Type>으로 넘겨준다.
+    useMutation<MutationResult>("/api/users/enter", "POST");
+  const [confirm, { loading: tokenLoading, data: tokenData }] =
+    // EnterMutationResult은 useMutation의 <Type>으로 넘겨준다.
+    useMutation<MutationResult>("/api/users/confirm", "POST");
   const [method, setMethod] = useState<"email" | "phone">("email");
-  const onEmailClick = () => setMethod("email");
-  const onPhoneClick = () => setMethod("phone");
+  const { register, reset, handleSubmit } = useForm<EnterForm>();
+  const {
+    register: tokenRegister,
+    reset: tokenReset,
+    handleSubmit: tokenHandleSubmit,
+  } = useForm<tokenForm>();
+
+  const onEmailClick = () => {
+    reset();
+    setMethod("email");
+  };
+  const onPhoneClick = () => {
+    reset();
+    setMethod("phone");
+  };
+  const onValid = (validForm: EnterForm) => {
+    enter(validForm);
+  };
+  const onTokenValid = (validForm: tokenForm) => {
+    if (tokenLoading) return;
+    confirm(validForm);
+  };
+  const router = useRouter();
+  useEffect(() => {
+    if (tokenData?.ok) {
+      router.push("/");
+    }
+  }, [tokenData, router]);
   return (
     <div className="mt-16 px-4">
       <h3 className="text-center text-3xl font-bold">Enter to Carrot</h3>
-      <div className="mt-8">
-        <div className="flex flex-col items-center">
-          <h5 className="text-sm font-medium text-gray-500">Enter using:</h5>
-          <div className="mt-8 grid w-full grid-cols-2 border-b">
-            <button
-              className={cls(
-                "border-b-2 pb-4 font-medium transition",
-                method === "email"
-                  ? " border-orange-500 text-orange-500"
-                  : "border-transparent text-gray-500"
-              )}
-              onClick={onEmailClick}
-            >
-              Email
-            </button>
-            <button
-              className={cls(
-                "border-b-2 pb-4 font-medium transition",
-                method === "phone"
-                  ? " border-orange-500  text-orange-500"
-                  : "border-transparent text-gray-500"
-              )}
-              onClick={onPhoneClick}
-            >
-              Phone
-            </button>
-          </div>
-        </div>
-        <form className="mt-8 flex flex-col">
-          <label htmlFor="input" className="text-sm font-medium text-gray-700">
-            {method === "email" ? "Email address" : null}
-            {method === "phone" ? "Phone number" : null}
-          </label>
-          <div className="mt-1">
-            {method === "email" ? (
-              <input
-                id="input"
-                type="email"
-                className="w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
-                required
-              />
-            ) : null}
-            {method === "phone" ? (
-              <div className="flex rounded-sm shadow-sm ">
-                <span className="flex items-center justify-center rounded-l-md  border border-r-0 border-gray-300 bg-gray-50 px-3 text-sm text-gray-500">
-                  +82
-                </span>
-                <input
-                  id="input"
-                  type="number"
-                  required
-                  className="w-full appearance-none rounded-md rounded-l-none border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-orange-500 focus:outline-none focus:ring-orange-500"
-                />
+      <div className="mt-12">
+        {data?.ok ? (
+          <form
+            onSubmit={tokenHandleSubmit(onTokenValid)}
+            className="space-y-4"
+          >
+            <Input
+              register={tokenRegister("token", {
+                required: "발급된 토큰을 입력하세요.",
+              })}
+              name="token"
+              label="Token Number"
+              type="token"
+              required
+            />
+            <Button text={tokenLoading ? "Loading" : "Confirm Token"} />
+          </form>
+        ) : (
+          <>
+            <div className="flex flex-col items-center">
+              <h5 className="text-sm font-medium text-gray-500">
+                Enter using:
+              </h5>
+              <div className="mt-8  grid  w-full grid-cols-2 border-b ">
+                <button
+                  className={cls(
+                    "border-b-2 pb-4 text-sm font-medium",
+                    method === "email"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent text-gray-500 hover:text-gray-400"
+                  )}
+                  onClick={onEmailClick}
+                >
+                  Email
+                </button>
+                <button
+                  className={cls(
+                    "border-b-2 pb-4 text-sm font-medium",
+                    method === "phone"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent text-gray-500 hover:text-gray-400"
+                  )}
+                  onClick={onPhoneClick}
+                >
+                  Phone
+                </button>
               </div>
-            ) : null}
-          </div>
-          <button className="mt-5 rounded-md border border-transparent bg-orange-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
-            {method === "email" ? "Get login link" : null}
-            {method === "phone" ? "Get one-time password" : null}
-          </button>
-        </form>
+            </div>
+            <form
+              onSubmit={handleSubmit(onValid)}
+              className="mt-8 flex flex-col space-y-4"
+            >
+              {method === "email" ? (
+                <Input
+                  register={register("email", {
+                    required: "이메일을 적어주세요.",
+                  })}
+                  name="email"
+                  label="Email address"
+                  type="email"
+                  required
+                />
+              ) : null}
+              {method === "phone" ? (
+                <Input
+                  register={register("phone", {
+                    required: "휴대폰 번호를 입력해주세요.",
+                  })}
+                  name="phone"
+                  label="Phone number"
+                  type="number"
+                  kind="phone"
+                  required
+                />
+              ) : null}
+              {method === "email" ? (
+                <Button text={loading ? "Loading" : "Get login link"} />
+              ) : null}
+              {method === "phone" ? (
+                <Button text={loading ? "Loading" : "Get one-time password"} />
+              ) : null}
+            </form>
+          </>
+        )}
+
         <div className="mt-8">
           <div className="relative">
-            <div className="absolute w-full border-t border-gray-400" />
-            <div className="relative -top-3 text-center">
+            <div className="absolute w-full border-t border-gray-300" />
+            <div className="relative -top-3 text-center ">
               <span className="bg-white px-2 text-sm text-gray-500">
                 Or enter with
               </span>
@@ -111,4 +179,5 @@ export default function Enter() {
       </div>
     </div>
   );
-}
+};
+export default Enter;
