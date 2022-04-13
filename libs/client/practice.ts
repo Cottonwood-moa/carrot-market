@@ -1,19 +1,15 @@
 import { useState } from "react";
-// state의 타입을 지정
-interface StateType<T> {
-  loading: boolean;
-  error?: object;
-  data?: T;
-}
-type UseMutationType<T> = [(data: T) => void, StateType<T>];
-// 이 훅은 fetch함수와 response data, loading, error를 반환한다.
-export default function useMutation<T = any>(url: string): UseMutationType<T> {
-  const [state, setState] = useState<StateType<T>>({
+
+// state의 타입 지정.
+// 훅이 반환하는 타입.
+
+export default function useMutation(url: string) {
+  const [state, setState] = useState({
     loading: false,
     error: undefined,
-    data: undefined, // api 서버에서 응답된 데이터.
+    data: undefined,
   });
-  function mutation(data: T) {
+  function mutation(data: any) {
     setState((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method: "POST",
@@ -27,5 +23,6 @@ export default function useMutation<T = any>(url: string): UseMutationType<T> {
       .catch((error) => setState((prev) => ({ ...prev, error })))
       .finally(() => setState((prev) => ({ ...prev, loading: false })));
   }
+
   return [mutation, { ...state }];
 }
