@@ -39,6 +39,58 @@ async function handler(
       chat,
     });
   }
+  if (req.method === "GET") {
+    const {
+      session: { user },
+    } = req;
+    const chat = await client.chat.findMany({
+      where: {
+        OR: [
+          {
+            product: {
+              userId: user?.id,
+            },
+          },
+          { buyerId: user?.id },
+        ],
+      },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        buyer: {
+          select: {
+            avatar: true,
+            name: true,
+            id: true,
+          },
+        },
+        ChatMessage: {
+          select: {
+            message: true,
+          },
+          distinct: ["createdAt"],
+          orderBy: {
+            id: "desc",
+          },
+        },
+      },
+    });
+    res.json({
+      ok: true,
+      chat,
+    });
+  }
 }
 
 export default withApiSession(

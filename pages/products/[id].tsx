@@ -8,6 +8,7 @@ import { Chat, Product, User } from "@prisma/client";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
 import { useEffect } from "react";
+import useUser from "@libs/client/useUser";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -24,11 +25,15 @@ interface CreateChatResponse {
 }
 const ItemDetail: NextPage = () => {
   const router = useRouter();
+  const { user } = useUser();
+  // 프로덕트
   const { data, mutate } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
+  // 채팅
   const [createChat, { loading, data: chatData }] =
     useMutation<CreateChatResponse>(`/api/chats`, "POST");
+  // 하트
   const [toggleFav] = useMutation(
     `/api/products/${router.query.id}/fav`,
     "POST"
@@ -74,6 +79,7 @@ const ItemDetail: NextPage = () => {
               <Button
                 large
                 text="Talk to seller"
+                disabled={user?.id === data?.product?.userId}
                 onClick={() => talkToSeller(data?.product?.id as number)}
               />
               <button

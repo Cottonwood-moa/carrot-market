@@ -19,23 +19,32 @@ async function handler(
   const userPayload = phone ? { phone } : email ? { email } : null;
   if (!userPayload) return res.status(400).json({ ok: false });
   const tokenPayload = Math.floor(100000 + Math.random() * 900000) + "";
-  const user = await client.user.upsert({
+
+  const existingUser = await client.user.findUnique({
     where: {
       ...userPayload,
     },
-    create: {
-      name: "Annoymous",
-      ...userPayload,
-    },
-    update: {},
   });
+  let user;
+  if (!existingUser) {
+    user = await client.user.create({
+      data: {
+        name: "Annoymous",
+        ...userPayload,
+      },
+    });
+  }
+  if (existingUser) {
+    user = existingUser;
+  }
+
   const token = await client.token.create({
     data: {
       payload: tokenPayload,
       user: {
         connect: {
           // key: token id , value : user.id ??
-          id: user.id,
+          id: user?.id,
         },
       },
     },

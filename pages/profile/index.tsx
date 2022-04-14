@@ -5,8 +5,6 @@ import useUser from "@libs/client/useUser";
 import useSWR from "swr";
 import { Review, User } from "@prisma/client";
 import { cls } from "@libs/client/utils";
-import { useEffect } from "react";
-import { useRouter } from "next/router";
 interface ReviewWithUser extends Review {
   createdBy: User;
 }
@@ -22,7 +20,14 @@ const Profile: NextPage = () => {
     <Layout hasTabBar title="나의 캐럿">
       <div className="px-4">
         <div className="mt-4 flex items-center space-x-3">
-          <div className="h-16 w-16 rounded-full bg-slate-500" />
+          <img
+            src={
+              user?.avatar
+                ? `https://imagedelivery.net/eckzMTmKrj-QyR0rrfO7Fw/${user?.avatar}/avatar`
+                : undefined
+            }
+            className="h-16 w-16 rounded-full bg-slate-500"
+          />
           <div className="flex flex-col">
             <span className="font-medium text-gray-900">
               {isLoading ? "Loading" : user?.name}

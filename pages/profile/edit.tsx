@@ -4,7 +4,7 @@ import Input from "@components/input";
 import Layout from "@components/layout";
 import useUser from "@libs/client/useUser";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useMutation from "@libs/client/useMutation";
 import { useRouter } from "next/router";
 import { useSWRConfig } from "swr";
@@ -12,6 +12,7 @@ interface EditProfileForm {
   name?: string;
   email?: string;
   phone?: string;
+  avatar?: FileList;
   error?: string;
 }
 interface EditProfileMutationResponse {
@@ -27,42 +28,91 @@ const EditProfile: NextPage = () => {
     handleSubmit,
     setError,
     formState: { errors },
+    watch,
   } = useForm<EditProfileForm>();
+
   const [editProfile, { data, loading }] =
     useMutation<EditProfileMutationResponse>(`/api/users/me`, "POST");
+
   useEffect(() => {
     if (user?.name) setValue("name", user?.name);
     if (user?.email) setValue("email", user?.email);
     if (user?.phone) setValue("phone", user?.phone);
   }, [user, setValue]);
-  const onValid = ({ name, email, phone }: EditProfileForm) => {
+  // submit
+  const onValid = async ({ name, email, phone, avatar }: EditProfileForm) => {
     if (loading) return;
     if (email === "" && phone === "" && name === "")
       return setError("error", {
         message: "Email or phone number are required. You need to choose one ",
       });
-    editProfile({
-      name: name !== user?.name ? name : "",
-      email: email !== user?.email ? email : "",
-      phone: phone !== user?.phone ? phone : "",
-    });
+    if (avatar && avatar.length > 0 && user) {
+      // 저장할 CF URL
+      const { uploadURL } = await (await fetch(`/api/files`)).json();
+      // 자바스크립트로 FORM 만들기
+      const form = new FormData();
+      form.append("file", avatar[0], user?.id + "");
+      // image file POST 요청 -> CF URL로
+      // 여기서 나온 id가 저장됨 -> user.avatar
+      const {
+        result: { id },
+      } = await (
+        await fetch(uploadURL, {
+          method: "POST",
+          body: form,
+        })
+      ).json();
+
+      editProfile({
+        name: name !== user?.name ? name : "",
+        email: email !== user?.email ? email : "",
+        phone: phone !== user?.phone ? phone : "",
+        avatarId: id,
+      });
+    } else {
+      editProfile({
+        name: name !== user?.name ? name : "",
+        email: email !== user?.email ? email : "",
+        phone: phone !== user?.phone ? phone : "",
+      });
+    }
   };
+  // form error
   useEffect(() => {
     if (data && !data.ok) {
       setError("error", { message: data?.error });
     }
   }, [data, setError]);
+  // https://nomadcoders.co/carrot-market/lectures/3587
+  const avatar = watch("avatar");
+  const [avatarPreview, setAvatarPreview] = useState("");
+  useEffect(() => {
+    if (avatar && avatar.length > 0) {
+      const file = avatar[0];
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  }, [avatar]);
   return (
     <Layout canGoBack title="Edit Profile">
       <form onSubmit={handleSubmit(onValid)} className="space-y-4 py-10 px-4">
         <div className="flex items-center space-x-3">
-          <div className="h-14 w-14 rounded-full bg-slate-500" />
+          <img
+            src={
+              avatarPreview
+                ? avatarPreview
+                : user?.avatar
+                ? `https://imagedelivery.net/eckzMTmKrj-QyR0rrfO7Fw/${user?.avatar}/avatar`
+                : undefined
+            }
+            className="h-14 w-14 rounded-full bg-slate-500"
+          />
           <label
             htmlFor="picture"
             className="cursor-pointer rounded-md border border-gray-300 py-2 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             Change
             <input
+              {...register("avatar")}
               id="picture"
               type="file"
               className="hidden"

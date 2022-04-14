@@ -28,7 +28,10 @@ const ChatDetail: NextPage = () => {
   const { user } = useUser();
   const router = useRouter();
   const { data, mutate } = useSWR<ChatMessagesResponse>(
-    router.query.id ? `/api/chats/${router.query.id}` : null
+    router.query.id ? `/api/chats/${router.query.id}` : null,
+    {
+      refreshInterval: 100,
+    }
   );
   const [sendMessage, { data: sendMessageData, loading }] = useMutation(
     `/api/chats/${router.query.id}`,
@@ -37,22 +40,42 @@ const ChatDetail: NextPage = () => {
   const { register, handleSubmit, reset } = useForm<ChatForm>();
   const onValid = (message: ChatForm) => {
     if (loading) return;
+    mutate(
+      (prev) =>
+        prev &&
+        ({
+          ...prev,
+          chatMessages: {
+            ...prev.chatMessages,
+            ChatMessage: [
+              ...prev.chatMessages.ChatMessage,
+              {
+                id: Date.now(),
+                message: message.message,
+                userId: user?.id,
+              },
+            ],
+          },
+        } as any),
+      false
+    );
     sendMessage(message);
     reset();
   };
   useEffect(() => {
     if (data && data.ok) {
-      mutate();
       window.scrollTo(0, document.body.scrollHeight);
     }
-  }, [data, sendMessageData, mutate]);
+  }, [data]);
   return (
     <Layout
       canGoBack
       title={
-        data?.chatMessages?.product?.name +
-        " - " +
-        data?.chatMessages?.product?.user?.name
+        data
+          ? data?.chatMessages?.product?.name +
+            " - " +
+            data?.chatMessages?.product?.user?.name
+          : "Loading"
       }
     >
       <div className="space-y-4 py-10 px-4 pb-16">
@@ -66,11 +89,9 @@ const ChatDetail: NextPage = () => {
             </React.Fragment>
           );
         })}
-        {/* <Message message="Hi how much are you selling them for?" />
-        <Message message="I want ￦20,000" reversed />
-        <Message message="미쳤어" /> */}
         <form
           onSubmit={handleSubmit(onValid)}
+          autoComplete="off"
           className="fixed inset-x-0 bottom-0  bg-white py-2"
         >
           <div className="relative mx-auto flex w-full  max-w-md items-center">
