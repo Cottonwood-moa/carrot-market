@@ -5,7 +5,7 @@ import Layout from "@components/layout";
 import useUser from "@libs/client/useUser";
 import useSWR from "swr";
 import { Product } from "@prisma/client";
-
+import Skeleton from "@components/skeleton";
 export interface ProductWithCount extends Product {
   _count: {
     Fav: number;
@@ -18,20 +18,34 @@ interface ProductResponse {
 }
 
 const Home: NextPage = () => {
-  const { user, isLoading, mutate } = useUser();
   const { data } = useSWR<ProductResponse>("api/products");
   return (
     <Layout title="홈" hasTabBar>
       <div className="flex flex-col space-y-5 divide-y">
-        {data?.products?.map((product) => (
-          <Item
-            id={product.id}
-            key={product.id}
-            title={product.name}
-            price={product.price}
-            hearts={product._count.Fav}
-          />
-        ))}
+        {!data ? (
+          <>
+            <div className="mt-6 w-full space-y-16 pt-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => {
+                return (
+                  <>
+                    <Skeleton kind="product" />
+                  </>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          data?.products?.map((product) => (
+            <Item
+              id={product.id}
+              key={product.id}
+              title={product.name}
+              price={product.price}
+              hearts={product._count.Fav}
+              image={product.image}
+            />
+          ))
+        )}
         <FloatingButton href="/products/upload">
           <svg
             className="h-6 w-6"

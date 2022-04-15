@@ -7,27 +7,45 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponseType>
 ) {
-  const {
-    session: { user },
-  } = req;
-  const reviews = await client.review.findMany({
-    where: {
-      createdForId: user?.id,
-    },
-    include: {
-      createdBy: {
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
+  if (req.method === "POST") {
+    const {
+      session: { user },
+      body: { createdForId },
+    } = req;
+    const alreadyExists = await client.review.findFirst({
+      where: {
+        createdById: user?.id,
+      },
+    });
+    if (alreadyExists) {
+    }
+    res.json({
+      ok: true,
+    });
+  }
+  if (req.method === "GET") {
+    const {
+      session: { user },
+    } = req;
+    const reviews = await client.review.findMany({
+      where: {
+        createdForId: user?.id,
+      },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
         },
       },
-    },
-  });
-  return res.json({
-    ok: true,
-    reviews,
-  });
+    });
+    return res.json({
+      ok: true,
+      reviews,
+    });
+  }
 }
 
 export default withApiSession(

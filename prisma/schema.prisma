@@ -28,7 +28,7 @@ model User {
   phone           String?       @unique
   email           String?       @unique
   name            String
-  avatar          String?
+  avatar          String?       @default("c58d9e61-a41e-4bed-d579-fd8bc65f1500")
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   tokens          Token[]

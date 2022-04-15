@@ -14,8 +14,11 @@ interface ChatForm {
 interface ProductWithUser extends Product {
   user: User;
 }
+interface ChatMessageWithUser extends ChatMessage {
+  user: User;
+}
 interface ChatWithMessages extends Chat {
-  ChatMessage: ChatMessage[];
+  ChatMessage: ChatMessageWithUser[];
   product: ProductWithUser;
 }
 interface ChatMessagesResponse {
@@ -53,6 +56,7 @@ const ChatDetail: NextPage = () => {
                 id: Date.now(),
                 message: message.message,
                 userId: user?.id,
+                createdAt: Date(),
               },
             ],
           },
@@ -84,7 +88,13 @@ const ChatDetail: NextPage = () => {
             <React.Fragment key={message?.id}>
               <Message
                 message={message?.message}
+                avatarUrl={
+                  message?.userId === user?.id
+                    ? user?.avatar
+                    : message?.user?.avatar
+                }
                 reversed={message?.userId === user?.id}
+                createAt={message?.createdAt}
               />
             </React.Fragment>
           );

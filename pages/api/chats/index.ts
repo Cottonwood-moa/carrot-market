@@ -44,6 +44,11 @@ async function handler(
       session: { user },
     } = req;
     const chat = await client.chat.findMany({
+      // 역배열
+      distinct: ["createdAt"],
+      orderBy: {
+        id: "desc",
+      },
       where: {
         OR: [
           {
@@ -64,6 +69,7 @@ async function handler(
               select: {
                 id: true,
                 name: true,
+                avatar: true,
               },
             },
           },

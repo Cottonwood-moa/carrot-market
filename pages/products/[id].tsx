@@ -9,7 +9,8 @@ import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
 import { useEffect } from "react";
 import useUser from "@libs/client/useUser";
-
+import imageDelivery from "@libs/client/imageDelivery";
+import Image from "next/image";
 interface ProductWithUser extends Product {
   user: User;
 }
@@ -53,9 +54,15 @@ const ItemDetail: NextPage = () => {
     <Layout canGoBack>
       <div className="px-4  py-4">
         <div className="mb-8">
-          <div className="h-96 bg-slate-300" />
+          <img
+            src={imageDelivery(data?.product?.image, "product")}
+            className="h-96 w-full rounded-lg  bg-slate-300"
+          />
           <div className="flex cursor-pointer items-center space-x-3 border-t border-b py-3">
-            <div className="h-12 w-12 rounded-full bg-slate-300" />
+            <img
+              src={imageDelivery(data?.product?.user?.avatar, "avatar")}
+              className="h-12 w-12 rounded-full bg-slate-300"
+            />
             <div>
               <p className="text-sm font-medium text-gray-700">
                 {data?.product?.user?.name}
@@ -68,10 +75,10 @@ const ItemDetail: NextPage = () => {
             </div>
           </div>
           <div className="mt-5">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-gray-900">
               {data?.product?.name}
             </h1>
-            <span className="mt-3 block text-2xl text-gray-900">
+            <span className="mt-3 block text-xl text-gray-900">
               ${data?.product?.price}
             </span>
             <p className=" my-6 text-gray-700">{data?.product?.description}</p>
@@ -130,14 +137,27 @@ const ItemDetail: NextPage = () => {
           <div className=" mt-6 grid grid-cols-2 gap-4">
             {data?.relatedProducts.map((product) => (
               <div key={product.id}>
-                <div className="mb-4 h-56 w-full bg-slate-300" />
-                <h3 className="-mb-1 text-gray-700">{product.name}</h3>
+                <Image
+                  src={imageDelivery(product?.image, "product")}
+                  width={232}
+                  height={224}
+                  className="mb-4 h-56 w-full bg-slate-300"
+                  alt=""
+                />
+                <h3 className="-mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-gray-700">
+                  {product.name}
+                </h3>
                 <span className="text-sm font-medium text-gray-900">
                   ${product.price}
                 </span>
               </div>
             ))}
           </div>
+          {data?.relatedProducts.length === 0 && (
+            <div className="w-full p-10 text-center text-lg font-semibold text-orange-400">
+              <p>비슷한 아이템이 없어요.</p>
+            </div>
+          )}
         </div>
       </div>
     </Layout>

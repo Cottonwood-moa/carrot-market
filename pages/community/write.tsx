@@ -36,7 +36,11 @@ const Write: NextPage = () => {
     <Layout canGoBack title="Write Post">
       <form onSubmit={handleSubmit(onValid)} className="space-y-4 p-4">
         <TextArea
-          register={register("question", { required: true, minLength: 5 })}
+          register={register("question", {
+            required: true,
+            minLength: 5,
+            maxLength: 100,
+          })}
           required
           placeholder="Ask a question!"
         />

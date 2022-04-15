@@ -11,6 +11,10 @@ async function handler(
   // const { user } = req.session;
   if (req.method === "GET") {
     const products = await client.product.findMany({
+      orderBy: {
+        id: "desc",
+      },
+
       include: {
         _count: {
           select: {
@@ -27,16 +31,16 @@ async function handler(
 
   if (req.method === "POST") {
     const {
-      body: { name, price, description },
+      body: { name, price, description, productImage },
       session: { user },
     } = req;
-
+    console.log(productImage);
     const product = await client.product.create({
       data: {
         name,
         price: +price,
         description,
-        image: "xx",
+        image: productImage,
         user: {
           connect: {
             id: user?.id,

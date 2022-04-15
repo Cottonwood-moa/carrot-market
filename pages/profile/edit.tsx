@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import useMutation from "@libs/client/useMutation";
 import { useRouter } from "next/router";
 import { useSWRConfig } from "swr";
+import imageDelivery from "@libs/client/imageDelivery";
 interface EditProfileForm {
   name?: string;
   email?: string;
@@ -51,9 +52,11 @@ const EditProfile: NextPage = () => {
       const { uploadURL } = await (await fetch(`/api/files`)).json();
       // 자바스크립트로 FORM 만들기
       const form = new FormData();
+      // append의 user?.id +""는 사진이름 바꾸는 옵션
       form.append("file", avatar[0], user?.id + "");
       // image file POST 요청 -> CF URL로
       // 여기서 나온 id가 저장됨 -> user.avatar
+      console.log(form);
       const {
         result: { id },
       } = await (
@@ -100,9 +103,7 @@ const EditProfile: NextPage = () => {
             src={
               avatarPreview
                 ? avatarPreview
-                : user?.avatar
-                ? `https://imagedelivery.net/eckzMTmKrj-QyR0rrfO7Fw/${user?.avatar}/avatar`
-                : undefined
+                : imageDelivery(user?.avatar, "avatar")
             }
             className="h-14 w-14 rounded-full bg-slate-500"
           />

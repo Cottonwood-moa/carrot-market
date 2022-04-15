@@ -10,6 +10,7 @@ import { cls } from "@libs/client/utils";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import useUser from "@libs/client/useUser";
+import imageDelivery from "@libs/client/imageDelivery";
 interface AnswerWithUser extends Answer {
   user: User;
 }
@@ -83,6 +84,8 @@ const CommunityPostDetail: NextPage = () => {
   };
   const onValid = (form: AnswerForm) => {
     if (answerLoading) return;
+    console.log(data);
+
     sendAnswer(form);
   };
   const onDelete = (id: number) => {
@@ -108,7 +111,10 @@ const CommunityPostDetail: NextPage = () => {
           동네질문
         </span>
         <div className="mb-3 flex cursor-pointer items-center space-x-3  border-b px-4 pb-3">
-          <div className="h-10 w-10 rounded-full bg-slate-300" />
+          <img
+            src={imageDelivery(data?.post?.user?.avatar, "avatar")}
+            className="h-10 w-10 rounded-full bg-slate-300"
+          />
           <div>
             <p className="text-sm font-medium text-gray-700">
               {data?.post?.user?.name}
@@ -175,7 +181,10 @@ const CommunityPostDetail: NextPage = () => {
                 key={answer.id}
                 className="relative flex items-start  space-x-3"
               >
-                <div className="h-8 w-8 rounded-full bg-slate-200" />
+                <img
+                  src={imageDelivery(answer?.user?.avatar, "avatar")}
+                  className="h-8 w-8 rounded-full bg-slate-200"
+                />
                 <div>
                   <span className="block text-sm font-medium text-gray-700">
                     {answer?.user?.name}
@@ -185,12 +194,14 @@ const CommunityPostDetail: NextPage = () => {
                   </span>
                   <p className="mt-2 text-gray-700">{answer?.answer}</p>
                 </div>
-                <div
-                  onClick={() => onDelete(answer.id)}
-                  className="absolute right-0 cursor-pointer text-sm font-medium text-gray-500 transition hover:text-gray-900"
-                >
-                  삭제
-                </div>
+                {answer?.user?.id === user?.id ? (
+                  <div
+                    onClick={() => onDelete(answer.id)}
+                    className="absolute right-0 cursor-pointer text-sm font-medium text-gray-500 transition hover:text-gray-900"
+                  >
+                    삭제
+                  </div>
+                ) : null}
               </div>
             );
           })}

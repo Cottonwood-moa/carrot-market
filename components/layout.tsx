@@ -21,8 +21,8 @@ export default function Layout({
     router.back();
   };
   return (
-    <div>
-      <div className="fixed top-0 flex h-12 w-full max-w-xl items-center justify-center  border-b bg-white px-10 text-lg  font-medium text-gray-800">
+    <div className="z-10">
+      <div className="fixed top-0 z-10 flex h-12 w-full max-w-xl items-center justify-center  border-b bg-white px-10 text-lg  font-medium text-gray-800">
         {canGoBack ? (
           <button onClick={onClick} className="absolute left-4">
             <svg
@@ -42,7 +42,14 @@ export default function Layout({
           </button>
         ) : null}
         {title ? (
-          <span className={cls(canGoBack ? "mx-auto" : "", "")}>{title}</span>
+          <span
+            className={cls(
+              canGoBack ? "mx-auto" : "",
+              "z-10 overflow-hidden text-ellipsis  whitespace-nowrap text-base font-normal text-orange-400"
+            )}
+          >
+            {title}
+          </span>
         ) : null}
       </div>
       <div className={cls("pt-12", hasTabBar ? "pb-24" : "")}>{children}</div>
@@ -126,7 +133,7 @@ export default function Layout({
               <span>채팅</span>
             </a>
           </Link>
-          <Link href="/streams">
+          {/* <Link href="/streams">
             <a
               className={cls(
                 "flex flex-col items-center space-y-2 ",
@@ -151,7 +158,7 @@ export default function Layout({
               </svg>
               <span>라이브</span>
             </a>
-          </Link>
+          </Link> */}
           <Link href="/profile">
             <a
               className={cls(
@@ -175,7 +182,7 @@ export default function Layout({
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                 ></path>
               </svg>
-              <span>나의 캐럿</span>
+              <span>내 프로필</span>
             </a>
           </Link>
         </nav>

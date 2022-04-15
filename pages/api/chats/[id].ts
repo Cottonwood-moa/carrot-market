@@ -17,13 +17,23 @@ async function handler(
         id: +id.toString(),
       },
       include: {
-        ChatMessage: true,
+        ChatMessage: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                avatar: true,
+              },
+            },
+          },
+        },
         product: {
           select: {
             name: true,
             user: {
               select: {
                 name: true,
+                avatar: true,
               },
             },
           },
@@ -52,6 +62,14 @@ async function handler(
         user: {
           connect: {
             id: user?.id,
+          },
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            avatar: true,
           },
         },
       },
