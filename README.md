@@ -40,6 +40,9 @@
 - Iron Session
 - React Hook Form
 
+## DB ERD  
+![Sample DBD for Airbnb (1)](https://user-images.githubusercontent.com/79053495/163667745-aacb476b-10e6-454d-9a99-84eba62ebe42.png)  
+
 ## Enter
 
 ![enter](https://user-images.githubusercontent.com/79053495/163665461-b241f1f8-2385-46e5-bfee-aef997594567.png)
