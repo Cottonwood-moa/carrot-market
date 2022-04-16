@@ -1,4 +1,4 @@
-# 🥕 Market application clone
+# 🥕 Market application
 
 ## 📖 Docs
 
