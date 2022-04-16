@@ -52,6 +52,11 @@
 
 ![productList](https://user-images.githubusercontent.com/79053495/163665467-8548b5e8-458a-4615-9c07-fb17ee060922.png)
 
+## Product Upload Form + Image Preview
+
+![20220416162737](https://user-images.githubusercontent.com/79053495/163666133-6998d9c0-f619-4c2c-83c6-cc31f6a07716.png)  
+![20220416162840](https://user-images.githubusercontent.com/79053495/163666145-ed0f74aa-381f-48f4-8d4c-1f2dc915d0cf.png)
+
 ## Related
 
 ![related](https://user-images.githubusercontent.com/79053495/163665471-0f1f50e0-3b30-4248-9036-fcab8185a088.png)
