@@ -6,6 +6,8 @@ import useUser from "@libs/client/useUser";
 import useSWR from "swr";
 import { Product } from "@prisma/client";
 import Skeleton from "@components/skeleton";
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
 export interface ProductWithCount extends Product {
   _count: {
     Fav: number;
@@ -15,21 +17,29 @@ export interface ProductWithCount extends Product {
 interface ProductResponse {
   ok: boolean;
   products: ProductWithCount[];
+  error?: string;
 }
 
 const Home: NextPage = () => {
   const { data } = useSWR<ProductResponse>("api/products");
+  const router = useRouter();
+  useEffect(() => {
+    console.log(data);
+    if (data && !data.ok && data?.error?.includes("login"))
+      router.replace("/enter");
+    else if (data && !data?.ok) router.replace("/404");
+  }, [data, router]);
   return (
     <Layout title="홈" hasTabBar>
       <div className="flex flex-col space-y-5 divide-y">
         {!data ? (
           <>
             <div className="mt-6 w-full space-y-16 pt-6">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => {
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item, i) => {
                 return (
-                  <>
+                  <React.Fragment key={i}>
                     <Skeleton kind="product" />
-                  </>
+                  </React.Fragment>
                 );
               })}
             </div>

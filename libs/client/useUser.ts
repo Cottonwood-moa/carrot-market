@@ -10,6 +10,7 @@ export default function useUser() {
   const { data, error, mutate } = useSWR<ProfileResponse>("/api/users/me");
   const router = useRouter();
   useEffect(() => {
+    if (router.pathname === "/enter") return;
     if (data && !data.ok) {
       router.replace("/enter");
     }

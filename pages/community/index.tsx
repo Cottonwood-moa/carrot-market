@@ -7,8 +7,9 @@ import useSWRInfinite from "swr/infinite";
 import { Post } from "@prisma/client";
 import useCoords from "@libs/client/useCoords";
 import { useInfiniteScroll } from "@libs/client/useInfiniteScroll";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Skeleton from "@components/skeleton";
+import useUser from "@libs/client/useUser";
 interface PostWithName extends Post {
   user: {
     name: string;
@@ -26,6 +27,7 @@ interface PostsResponse {
 
 const Community: NextPage = () => {
   const { latitude, longitude } = useCoords();
+  const { user } = useUser();
   const getKey = (pageIndex: number, previousPageData: PostsResponse) => {
     if (latitude && longitude && pageIndex === 0)
       return `/api/posts?page=1&latitude=${latitude}&longitude=${longitude}`;
@@ -35,7 +37,7 @@ const Community: NextPage = () => {
     }&latitude=${latitude}&longitude=${longitude}`;
   };
   const { data, setSize } = useSWRInfinite<PostsResponse>(getKey);
-  const posts = data ? data.map((post) => post.posts).flat() : [];
+  const posts = data ? data.map((post) => post?.posts).flat() : [];
   const page = useInfiniteScroll();
   useEffect(() => {
     setSize(page);
@@ -47,18 +49,18 @@ const Community: NextPage = () => {
         {!data ? (
           <>
             <div className="mt-6 w-full space-y-16 pt-6">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item) => {
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((item, i) => {
                 return (
-                  <>
+                  <React.Fragment key={i}>
                     <Skeleton kind="card" />
-                  </>
+                  </React.Fragment>
                 );
               })}
             </div>
           </>
         ) : (
           posts?.map((post) => (
-            <Link key={post.id} href={`/community/${post.id}`}>
+            <Link key={post?.id} href={`/community/${post?.id}`}>
               <a className="flex cursor-pointer flex-col items-start pt-4">
                 <span className="ml-4 flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
                   동네질문

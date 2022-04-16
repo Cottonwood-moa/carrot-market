@@ -20,7 +20,7 @@ async function handler(
       take: 10,
       skip: 10 * (+page - 1),
     });
-
+    if (!streams) return res.json({ ok: false });
     res.json({
       ok: true,
       streams,

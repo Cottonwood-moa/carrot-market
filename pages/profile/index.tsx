@@ -9,6 +9,7 @@ import imageDelivery from "@libs/client/imageDelivery";
 import Input from "@components/input";
 import Image from "next/image";
 import Skeleton from "@components/skeleton";
+import React from "react";
 interface ReviewWithUser extends Review {
   createdBy: User;
 }
@@ -19,7 +20,6 @@ interface ReviewsResponse {
 const Profile: NextPage = () => {
   const { user, isLoading } = useUser();
   const { data } = useSWR<ReviewsResponse>("/api/reviews");
-
   return (
     <Layout hasTabBar title="내 프로필">
       <div className="px-4">
@@ -111,18 +111,18 @@ const Profile: NextPage = () => {
         {isLoading ? (
           <>
             <div className="mt-6 w-full space-y-16 pt-6">
-              {[1, 2, 3, 4, 5].map((item) => {
+              {[1, 2, 3, 4, 5].map((item, i) => {
                 return (
-                  <>
-                    <Skeleton />
-                  </>
+                  <React.Fragment key={i}>
+                    <Skeleton kind="card" />
+                  </React.Fragment>
                 );
               })}
             </div>
           </>
         ) : (
           <div className="divide-y-2">
-            {data?.reviews.map((review) => {
+            {data?.reviews?.map((review) => {
               return (
                 <div key={review.id} className="mt-6 pt-6">
                   <div className="flex items-center space-x-4">

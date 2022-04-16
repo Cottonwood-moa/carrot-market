@@ -16,6 +16,7 @@ async function handler(
         id: req.session.user?.id,
       },
     });
+    if (!profile) return res.json({ ok: false });
     return res.json({
       ok: true,
       profile,

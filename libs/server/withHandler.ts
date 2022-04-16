@@ -32,7 +32,6 @@ export default function withHandler({
       // handler 호출 부분
       await handler(req, res);
     } catch (error) {
-      console.log(error);
       return res.status(500).json(error);
     }
   };
