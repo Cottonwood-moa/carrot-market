@@ -19,6 +19,7 @@
 - Next RestAPI 구축.
 - SWR data fetching
 - SWR Infinite Loading.
+- SSR + SSG 
 - ORM - Prisma
 - Serverless DB - Planet Scale
 - Iron Session 유저 세션관리.
