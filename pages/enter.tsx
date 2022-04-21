@@ -1,11 +1,27 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Button from "@components/button";
 import Input from "@components/input";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
 import { useRouter } from "next/router";
+
+import dynamic from "next/dynamic";
+// import Bs from "@components/bs";
+// next.js는 pre-render 컨셉을 가지고 있기 때문에
+// 서버단에서 일반 HTML로 export가 되는데
+// 몇몇라이브러리나 패키지는 서버단에서 로딩하는게 불가능하다.
+// 그럴때 ssr:false 옵션을 붙여주자.
+const Bs = dynamic(
+  // @ts-ignore
+  () =>
+    new Promise((resolve) =>
+      setTimeout(() => resolve(import("@components/bs")), 2000)
+    ),
+  { ssr: false, suspense: true }
+);
+
 interface EnterForm {
   email?: string;
   phone?: string;
@@ -119,16 +135,21 @@ const Enter: NextPage = () => {
                 />
               ) : null}
               {method === "phone" ? (
-                <Input
-                  register={register("phone", {
-                    required: "휴대폰 번호를 입력해주세요.",
-                  })}
-                  name="phone"
-                  label="Phone number"
-                  type="number"
-                  kind="phone"
-                  required
-                />
+                <>
+                  <Input
+                    register={register("phone", {
+                      required: "휴대폰 번호를 입력해주세요.",
+                    })}
+                    name="phone"
+                    label="Phone number"
+                    type="number"
+                    kind="phone"
+                    required
+                  />
+                  <Suspense fallback={<span>loading</span>}>
+                    <Bs />
+                  </Suspense>
+                </>
               ) : null}
               {method === "email" ? (
                 <Button text={loading ? "Loading" : "Get login link"} />

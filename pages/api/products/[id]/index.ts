@@ -16,15 +16,15 @@ async function handler(
     where: {
       id: +id.toString(),
     },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
-        },
-      },
-    },
+    // include: {
+    //   user: {
+    //     select: {
+    //       id: true,
+    //       name: true,
+    //       avatar: true,
+    //     },
+    //   },
+    // },
   });
   const terms = product?.name.split(" ").map((word) => ({
     name: {
@@ -38,7 +38,7 @@ async function handler(
       OR: terms,
       AND: {
         id: {
-          not: product?.id,
+          not: +id.toString(),
         },
       },
     },
@@ -46,7 +46,7 @@ async function handler(
   const isLiked = Boolean(
     await client.fav.findFirst({
       where: {
-        productId: product?.id,
+        productId: +id.toString(),
         userId: user?.id,
       },
       select: {
@@ -56,7 +56,6 @@ async function handler(
   );
   res.json({
     ok: true,
-    product,
     isLiked,
     relatedProducts,
   });

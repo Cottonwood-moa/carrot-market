@@ -90,11 +90,13 @@ const Streams: NextPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">Live Chat</h2>
           <div className="h-[50vh] space-y-4 overflow-y-scroll py-10  px-4 pb-16">
             {data?.stream?.messages?.map((message) => {
+              const date = new Date();
               return (
                 <Message
                   key={message?.id}
                   message={message?.message}
                   reversed={message?.user?.id === user?.id}
+                  createAt={date}
                 ></Message>
               );
             })}

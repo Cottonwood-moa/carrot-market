@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Button from "@components/button";
 import Layout from "@components/layout";
 import { useRouter } from "next/router";
@@ -7,10 +7,12 @@ import Link from "next/link";
 import { Chat, Product, User } from "@prisma/client";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/client/utils";
-import { useEffect } from "react";
+import { ContextType, useEffect } from "react";
 import useUser from "@libs/client/useUser";
 import imageDelivery from "@libs/client/imageDelivery";
 import Image from "next/image";
+import client from "@libs/server/client";
+import ssrJson from "@libs/server/ssrJson";
 interface ProductWithUser extends Product {
   user: User;
 }
@@ -24,7 +26,7 @@ interface CreateChatResponse {
   ok: boolean;
   chat: Chat;
 }
-const ItemDetail: NextPage = () => {
+const ItemDetail: NextPage<{ product: ProductWithUser }> = ({ product }) => {
   const router = useRouter();
   const { user } = useUser();
   // 프로덕트
@@ -50,24 +52,28 @@ const ItemDetail: NextPage = () => {
   useEffect(() => {
     if (chatData && chatData.ok) router.push(`/chats/${chatData.chat.id}`);
   }, [chatData, router]);
+  // 첫번째 방문자를 위한 로딩
+  if (router.isFallback) {
+    return <Layout title="Loading For UUUU">loading</Layout>;
+  }
   return (
     <Layout canGoBack>
       <div className="px-4  py-4">
         <div className="mb-8">
           <img
-            src={imageDelivery(data?.product?.image, "product")}
+            src={imageDelivery(product?.image, "product")}
             className="h-96 w-full rounded-lg  bg-slate-300"
           />
           <div className="flex cursor-pointer items-center space-x-3 border-t border-b py-3">
             <img
-              src={imageDelivery(data?.product?.user?.avatar, "avatar")}
+              src={imageDelivery(product?.user?.avatar, "avatar")}
               className="h-12 w-12 rounded-full bg-slate-300"
             />
             <div>
               <p className="text-sm font-medium text-gray-700">
-                {data?.product?.user?.name}
+                {product?.user?.name}
               </p>
-              <Link href={`/users/profiles/${data?.product?.user?.id}`}>
+              <Link href={`/users/profiles/${product?.user?.id}`}>
                 <a className="text-xs font-medium text-gray-500">
                   View profile &rarr;
                 </a>
@@ -75,19 +81,17 @@ const ItemDetail: NextPage = () => {
             </div>
           </div>
           <div className="mt-5">
-            <h1 className="text-xl font-bold text-gray-900">
-              {data?.product?.name}
-            </h1>
+            <h1 className="text-xl font-bold text-gray-900">{product?.name}</h1>
             <span className="mt-3 block text-xl text-gray-900">
-              ${data?.product?.price}
+              ${product?.price}
             </span>
-            <p className=" my-6 text-gray-700">{data?.product?.description}</p>
+            <p className=" my-6 text-gray-700">{product?.description}</p>
             <div className="flex items-center justify-between space-x-2">
               <Button
                 large
                 text="Talk to seller"
-                disabled={user?.id === data?.product?.userId}
-                onClick={() => talkToSeller(data?.product?.id as number)}
+                disabled={user?.id === product?.userId}
+                onClick={() => talkToSeller(product?.id as number)}
               />
               <button
                 onClick={onFavClick}
@@ -163,5 +167,34 @@ const ItemDetail: NextPage = () => {
     </Layout>
   );
 };
-
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+export const getStaticProps: GetStaticProps = async (ctx) => {
+  const {
+    params: { id },
+  } = ctx as any;
+  const product = await client.product.findUnique({
+    where: {
+      id: +id.toString(),
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+  return {
+    props: {
+      product: ssrJson(product),
+    },
+  };
+};
 export default ItemDetail;

@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Layout from "@components/layout";
 import TextArea from "@components/textarea";
 import { useRouter } from "next/router";
@@ -11,6 +11,8 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import useUser from "@libs/client/useUser";
 import imageDelivery from "@libs/client/imageDelivery";
+import client from "@libs/server/client";
+import ssrJson from "@libs/server/ssrJson";
 interface AnswerWithUser extends Answer {
   user: User;
 }
@@ -22,6 +24,9 @@ interface PostWithUser extends Post {
   user: User;
   _count: Count;
   Answer: AnswerWithUser[];
+}
+interface PostWithOnlyUser extends Post {
+  user: User;
 }
 
 interface PostsResponse {
@@ -40,7 +45,9 @@ interface DeleteResponse {
   ok: boolean;
   deleteData: Answer;
 }
-const CommunityPostDetail: NextPage = () => {
+const CommunityPostDetail: NextPage<{ post: PostWithOnlyUser }> = ({
+  post,
+}) => {
   const router = useRouter();
   const { user } = useUser();
   const { register, handleSubmit, reset } = useForm<AnswerForm>();
@@ -84,8 +91,6 @@ const CommunityPostDetail: NextPage = () => {
   };
   const onValid = (form: AnswerForm) => {
     if (answerLoading) return;
-    console.log(data);
-
     sendAnswer(form);
   };
   const onDelete = (id: number) => {
@@ -112,14 +117,14 @@ const CommunityPostDetail: NextPage = () => {
         </span>
         <div className="mb-3 flex cursor-pointer items-center space-x-3  border-b px-4 pb-3">
           <img
-            src={imageDelivery(data?.post?.user?.avatar, "avatar")}
+            src={imageDelivery(post?.user?.avatar, "avatar")}
             className="h-10 w-10 rounded-full bg-slate-300"
           />
           <div>
             <p className="text-sm font-medium text-gray-700">
-              {data?.post?.user?.name}
+              {post?.user?.name}
             </p>
-            <Link href={`/users/profiles/${data?.post?.user?.id}`}>
+            <Link href={`/users/profiles/${post?.user?.id}`}>
               <a className="text-xs font-medium text-gray-500">
                 View profile &rarr;
               </a>
@@ -129,7 +134,7 @@ const CommunityPostDetail: NextPage = () => {
         <div>
           <div className="mt-2 px-4 text-gray-700">
             <span className="font-medium text-orange-500">Q.</span>
-            {data?.post?.question}
+            {post?.question}
           </div>
           <div className="mt-3 flex w-full space-x-5 border-t border-b-[2px] px-4 py-2.5  text-gray-700">
             <button
@@ -226,5 +231,34 @@ const CommunityPostDetail: NextPage = () => {
     </Layout>
   );
 };
-
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+export const getStaticProps: GetStaticProps = async (ctx: any) => {
+  const {
+    params: { id },
+  } = ctx;
+  const post = await client.post.findUnique({
+    where: {
+      id: +id.toString(),
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+  return {
+    props: {
+      post: ssrJson(post),
+    },
+  };
+};
 export default CommunityPostDetail;

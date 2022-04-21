@@ -42,7 +42,7 @@ async function handler(
             name,
           },
         });
-        res.json({ ok: true });
+        return res.json({ ok: true });
       }
     }
     if (email && email !== currentUser?.email) {
@@ -73,7 +73,7 @@ async function handler(
             email,
           },
         });
-        res.json({ ok: true });
+        return res.json({ ok: true });
       }
     }
     if (phone && phone !== currentUser?.phone) {
@@ -102,7 +102,7 @@ async function handler(
             phone,
           },
         });
-        res.json({ ok: true });
+        return res.json({ ok: true });
       }
     }
     if (avatarId) {
@@ -115,7 +115,7 @@ async function handler(
         },
       });
     }
-    res.json({
+    return res.json({
       ok: true,
     });
   }

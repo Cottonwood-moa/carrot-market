@@ -12,14 +12,18 @@
     "@prisma/client": "^3.11.1",
     "@sendgrid/mail": "^7.6.2",
     "@tailwindcss/forms": "^0.5.0",
+    "gray-matter": "^4.0.3",
     "iron-session": "^6.1.2",
     "next": "12.1.4",
     "react": "18.0.0",
     "react-dom": "18.0.0",
     "react-hook-form": "^7.29.0",
+    "remark-html": "^15.0.1",
+    "remark-parse": "^10.0.1",
     "swr": "^1.2.2",
     "ts-node": "^10.7.0",
-    "twilio": "^3.76.0"
+    "twilio": "^3.76.0",
+    "unified": "^10.1.2"
   },
   "devDependencies": {
     "@types/node": "17.0.23",

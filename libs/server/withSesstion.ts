@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from "iron-session/next";
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
 // withIronSessionApiRoute으로 감싸는 요청은
 // session을 사용해야 하는 요청
 // enter는 로그인 하기 전이니 감싸주지 않는다.
@@ -18,4 +18,8 @@ const cookieOptions = {
 
 export function withApiSession(fn: any) {
   return withIronSessionApiRoute(fn, cookieOptions);
+}
+
+export function withSsrSession(fn: any) {
+  return withIronSessionSsr(fn, cookieOptions);
 }

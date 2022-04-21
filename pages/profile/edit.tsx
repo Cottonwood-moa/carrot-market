@@ -56,7 +56,6 @@ const EditProfile: NextPage = () => {
       form.append("file", avatar[0], user?.id + "");
       // image file POST 요청 -> CF URL로
       // 여기서 나온 id가 저장됨 -> user.avatar
-      console.log(form);
       const {
         result: { id },
       } = await (
